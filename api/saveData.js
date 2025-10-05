@@ -17,34 +17,38 @@ if (!client) {
 }
 
 export default async function handler(req, res) {
-  // Simple GET route for testing
+  // Simple GET route for testing API status
   if (req.method === 'GET') {
     return res.status(200).json({ message: 'API is running!' });
   }
 
-  // Only allow POST for saving data
+  // Only allow POST method for saving data
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).end('Method Not Allowed');
   }
 
   try {
+    // Wait for database connection
     await clientPromise;
     const db = client.db('ROSPL_Project');
     const collection = db.collection('Users');
 
+    // Extract username and emoji data from request body
     const { username, emoji } = req.body;
 
     if (!username || !emoji) {
       return res.status(400).json({ message: 'Username and emoji are required' });
     }
 
+    // Insert data into MongoDB collection
     const result = await collection.insertOne({
       username: decodeURIComponent(username),
       emoji: decodeURIComponent(emoji),
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
+    // Respond with success and inserted document ID
     res.status(201).json({ message: 'Data saved', id: result.insertedId });
   } catch (error) {
     console.error('Error saving data:', error);
