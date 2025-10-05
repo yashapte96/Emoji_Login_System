@@ -3,17 +3,33 @@ import { MongoClient } from 'mongodb';
 const uri = process.env.MONGODB_URI;
 
 if (!uri) {
-  throw new Error(
-    'Please add your MongoDB connection string to environment variables (MONGODB_URI)'
-  );
+  throw new Error('Please add your MongoDB connection string to environment variables (MONGODB_URI)');
 }
 
-let client;
-let clientPromise;
+// Create a cached connection variable
+let cachedClient = null;
+let cachedDb = null;
 
-if (!client) {
-  client = new MongoClient(uri);
-  clientPromise = client.connect();
+async function connectToDatabase() {
+  // If we have a connection, reuse it
+  if (cachedClient && cachedDb) {
+    return { client: cachedClient, db: cachedDb };
+  }
+
+  // If no connection, create a new one
+  const client = new MongoClient(uri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
+
+  await client.connect();
+  const db = client.db('ROSPL_Project');
+
+  // Cache the connection
+  cachedClient = client;
+  cachedDb = db;
+
+  return { client, db };
 }
 
 export default async function handler(req, res) {
@@ -29,9 +45,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Wait for database connection
-    await clientPromise;
-    const db = client.db('ROSPL_Project');
+    const { db } = await connectToDatabase();
     const collection = db.collection('Users');
 
     // Extract username and emoji data from request body
@@ -49,9 +63,15 @@ export default async function handler(req, res) {
     });
 
     // Respond with success and inserted document ID
-    res.status(201).json({ message: 'Data saved', id: result.insertedId });
+    res.status(201).json({ 
+      message: 'Data saved successfully',
+      id: result.insertedId.toString() 
+    });
   } catch (error) {
     console.error('Error saving data:', error);
-    res.status(500).json({ message: 'Error saving data', error: error.message });
+    res.status(500).json({ 
+      message: 'Error saving data', 
+      error: error.message 
+    });
   }
 }
