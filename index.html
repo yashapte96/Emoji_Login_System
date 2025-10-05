@@ -1566,6 +1566,54 @@ document.getElementById('signin-form').addEventListener('submit', async (e) => {
   const data = await response.json();
   alert(data.message);
 });
+
+        // Assuming your existing emojiPassword variable holds the emoji password
+// Add this in your main JS script block where event listeners are handled
+
+// Submit handler to validate inputs and send POST request
+document.getElementById('signInForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const username = document.getElementById('username').value.trim();
+
+  if (!username) {
+    alert('Please enter your username.');
+    return;
+  }
+
+  if (!emojiPassword || emojiPassword.length === 0) {
+    alert('Please create your emoji password by selecting emojis.');
+    return;
+  }
+
+  try {
+    const response = await fetch('/api/saveData', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: encodeURIComponent(username),
+        emoji: encodeURIComponent(emojiPassword),
+      }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      alert(data.message || 'Login data saved successfully!');
+      // Optionally reset inputs or move to next step
+      emojiPassword = '';
+      updatePasswordDisplay(); // if you have a function to update UI
+      document.getElementById('username').value = '';
+    } else {
+      alert(data.message || 'Failed to save login data.');
+    }
+
+  } catch (error) {
+    console.error('Error saving data:', error);
+    alert('An error occurred. Please try again later.');
+  }
+});
+
 </script>
 
 </body>
