@@ -19,14 +19,15 @@ if (!client) {
 export default async function handler(req, res) {
   // Simple GET route for testing API status
   if (req.method === 'GET') {
-    return res.status(200).json({ message: 'API is running!' });
-  }
+  res.status(200).json({ message: 'API is running!' });
+} else if (req.method === 'POST') {
+  // handle saving data
+} else {
+  res.setHeader('Allow', ['GET', 'POST']);
+  res.status(405).end(`Method ${req.method} Not Allowed`);
+}
 
-  // Only allow POST method for saving data
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', 'POST');
-    return res.status(405).end('Method Not Allowed');
-  }
+  // Only allow POST method for saving dat
 
   try {
     // Wait for database connection
