@@ -1,6 +1,6 @@
-import { MongoClient } from 'mongodb';
+const { MongoClient } = require('mongodb');
 
-const uri = process.env.MONGODB_URI; // Make sure you set MONGODB_URI in your environment variables
+const uri = process.env.MONGODB_URI;
 
 if (!uri) {
   throw new Error(
@@ -16,7 +16,7 @@ if (!client) {
   clientPromise = client.connect();
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).end('Method Not Allowed');
@@ -44,4 +44,4 @@ export default async function handler(req, res) {
     console.error('Error saving data:', error);
     res.status(500).json({ message: 'Error saving data', error: error.message });
   }
-}
+};
