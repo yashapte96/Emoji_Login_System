@@ -2,7 +2,7 @@ import express from 'express';
 import { MongoClient } from 'mongodb';
 import path from 'path';
 import dotenv from 'dotenv';
-dotenv.config();
+dotenv.config();  
 
 const app = express();
 const port = process.env.PORT || 3000;
