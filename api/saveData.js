@@ -1,15 +1,18 @@
 import { MongoClient } from 'mongodb';
 
-const uri = process.env.mongodb+srv:yashapte163_db_user:ziYacpWqAC9sVeup@cluster0.pzo7n77.mongodb.net/ROSPL_Project?retryWrites=true&w=majority;
+const uri = process.env.MONGODB_URI; // Make sure you set MONGODB_URI in your environment variables
 
-  throw new Error('Please add your MongoDB connection string to environment variables (MONGODB_URI)');
+if (!uri) {
+  throw new Error(
+    'Please add your MongoDB connection string to environment variables (MONGODB_URI)'
+  );
 }
 
 let client;
 let clientPromise;
 
 if (!client) {
-  client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+  client = new MongoClient(uri);
   clientPromise = client.connect();
 }
 
@@ -25,6 +28,10 @@ export default async function handler(req, res) {
     const collection = db.collection('Users');
 
     const { username, emoji } = req.body;
+
+    if (!username || !emoji) {
+      return res.status(400).json({ message: 'Username and emoji are required' });
+    }
 
     const result = await collection.insertOne({
       username: decodeURIComponent(username),
