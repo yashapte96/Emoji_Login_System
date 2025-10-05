@@ -10,6 +10,9 @@ if (!uri) {
 
 let client;
 let clientPromise;
+if (req.method === 'GET') {
+  return res.status(200).json({ message: "API is running!" });
+}
 
 if (!client) {
   client = new MongoClient(uri);
