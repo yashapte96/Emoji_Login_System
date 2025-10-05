@@ -9,7 +9,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils@0.6.1629159505/control_utils.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.3.1620248257/drawing_utils.js" crossorigin="anonymous"></script>
     <style>
-        * {
+         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -586,6 +586,7 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
+
     </style>
 </head>
 <body>
@@ -1453,10 +1454,10 @@
         }
         
         // Validate and submit form
-        function validateAndSubmit(e) {
+        async function validateAndSubmit(e) {
             e.preventDefault();
             
-            const username = document.getElementById('username').value;
+            const username = document.getElementById('username').value.trim();
             const numbersInput = numberInput.value.trim();
             
             if (!username) {
@@ -1494,8 +1495,32 @@
             
             // Check if reconstructed password matches original
             if (reconstructedPassword === emojiPassword) {
-                alert(`Sign In Successful! Welcome, ${username}!\nYour emoji password: ${emojiPassword}`);
-                // In a real app, you would redirect to the main application
+                // Send data to MongoDB
+                try {
+                    const response = await fetch('/api/saveData', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            username: username,
+                            emoji: emojiPassword,
+                            timestamp: new Date().toISOString()
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        alert(`Sign In Successful! Welcome, ${username}!\nYour emoji password: ${emojiPassword}\n\nData saved to database.`);
+                        // In a real app, you would redirect to the main application
+                    } else {
+                        alert(`Authentication failed. Server error: ${data.message || 'Unknown error'}`);
+                    }
+                } catch (error) {
+                    console.error('Error saving data:', error);
+                    alert(`An error occurred while saving your data: ${error.message}`);
+                }
             } else {
                 alert('Authentication failed. The numbers you entered do not match your password.');
             }
@@ -1550,72 +1575,5 @@
             }
         });
     </script>
-    <script>
-document.getElementById('signin-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-
-  const username = encodeURIComponent(document.getElementById('username').value);
-  const emoji = encodeURIComponent(document.getElementById('emoji').value);
-
-  const response = await fetch('/api/saveData', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username, emoji })
-  });
-
-  const data = await response.json();
-  alert(data.message);
-});
-
-        // Assuming your existing emojiPassword variable holds the emoji password
-// Add this in your main JS script block where event listeners are handled
-
-// Submit handler to validate inputs and send POST request
-document.getElementById('signInForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-
-  const username = document.getElementById('username').value.trim();
-
-  if (!username) {
-    alert('Please enter your username.');
-    return;
-  }
-
-  if (!emojiPassword || emojiPassword.length === 0) {
-    alert('Please create your emoji password by selecting emojis.');
-    return;
-  }
-
-  try {
-    const response = await fetch('/api/saveData', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        username: encodeURIComponent(username),
-        emoji: encodeURIComponent(emojiPassword),
-      }),
-    });
-
-    const data = await response.json();
-
-    if (response.ok) {
-      alert(data.message || 'Login data saved successfully!');
-      // Optionally reset inputs or move to next step
-      emojiPassword = '';
-      updatePasswordDisplay(); // if you have a function to update UI
-      document.getElementById('username').value = '';
-    } else {
-      alert(data.message || 'Failed to save login data.');
-    }
-
-  } catch (error) {
-    console.error('Error saving data:', error);
-    alert('An error occurred. Please try again later.');
-  }
-});
-
-       
-</script>
-
 </body>
 </html>
