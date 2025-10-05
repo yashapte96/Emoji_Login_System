@@ -1,5 +1,12 @@
 {
+  "name": "emoji-login-system",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev",
+    "start": "node server.js"
+  },
   "dependencies": {
-    "mongodb": "^6.20.0"
+    "mongodb": "^5.0.0"
   }
 }
