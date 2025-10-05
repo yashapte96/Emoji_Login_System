@@ -17,7 +17,7 @@ if (!client) {
 }
 
 export default async function handler(req, res) {
-  // Simple GET test route
+  // Simple GET route for testing
   if (req.method === 'GET') {
     return res.status(200).json({ message: 'API is running!' });
   }
