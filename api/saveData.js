@@ -10,9 +10,6 @@ if (!uri) {
 
 let client;
 let clientPromise;
-if (req.method === 'GET') {
-  return res.status(200).json({ message: "API is running!" });
-}
 
 if (!client) {
   client = new MongoClient(uri);
@@ -20,6 +17,12 @@ if (!client) {
 }
 
 export default async function handler(req, res) {
+  // Simple GET test route
+  if (req.method === 'GET') {
+    return res.status(200).json({ message: 'API is running!' });
+  }
+
+  // Only allow POST for saving data
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).end('Method Not Allowed');
